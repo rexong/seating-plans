@@ -24,9 +24,6 @@ export default async function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-6 px-6 py-12">
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium tracking-wide text-zinc-500 uppercase">
-          Phase 2
-        </p>
         <h1 className="text-3xl font-semibold tracking-tight">Seat Planning</h1>
         {status.ok ? (
           <p className="text-sm text-emerald-700">Database connected.</p>

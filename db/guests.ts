@@ -43,6 +43,16 @@ export async function createGuests(input: {
     .returning();
 }
 
+export async function getGuestForEvent(eventId: string, guestId: string) {
+  const db = getDb();
+  const [guest] = await db
+    .select()
+    .from(guests)
+    .where(and(eq(guests.id, guestId), eq(guests.eventId, eventId)))
+    .limit(1);
+  return guest ?? null;
+}
+
 export async function deleteGuestById(eventId: string, guestId: string) {
   const db = getDb();
   const [guest] = await db

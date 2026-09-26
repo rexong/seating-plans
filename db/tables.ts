@@ -26,6 +26,16 @@ export async function createTable(eventId: string) {
   return table;
 }
 
+export async function getTableById(eventId: string, tableId: string) {
+  const db = getDb();
+  const [table] = await db
+    .select()
+    .from(tables)
+    .where(and(eq(tables.id, tableId), eq(tables.eventId, eventId)))
+    .limit(1);
+  return table ?? null;
+}
+
 export async function deleteTableById(eventId: string, tableId: string) {
   const db = getDb();
   const [table] = await db

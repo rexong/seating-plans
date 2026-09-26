@@ -69,8 +69,7 @@ export async function deleteTableAction(
     return { error: "Event not found" };
   }
 
-  // Unseat-on-delete applies when assignments exist (Phase 5+). This phase
-  // only removes the table row.
+  // ON DELETE SET NULL unseats guests on this table.
   await deleteTableById(event.id, tableId.data);
   revalidatePath(`/events/${event.shareToken}`);
   return null;

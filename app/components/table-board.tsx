@@ -1,5 +1,19 @@
+"use client";
+
+import { useDroppable } from "@dnd-kit/core";
 import { CreateTableButton } from "@/app/components/create-table-button";
 import { DeleteTableButton } from "@/app/components/delete-table-button";
+import {
+  DraggableGuestCard,
+  GUEST_CARD_CLASS,
+  StaticGuestCard,
+} from "@/app/components/guest-card";
+import { UnseatGuestButton } from "@/app/components/unseat-guest-button";
+import {
+  guestAssignmentLabel,
+  guestBySeat,
+  type SeatingGuest,
+} from "@/lib/seating";
 
 type EventTable = {
   id: string;
@@ -11,19 +25,108 @@ type Props = {
   eventId: string;
   shareToken: string;
   tables: EventTable[];
+  guests: SeatingGuest[];
+  tableLabels: Record<string, string>;
   listError: string | null;
+  interactive: boolean;
+  onUnseat?: (guestId: string) => void;
 };
 
-function EmptySeats({ count }: { count: number }) {
+function SeatDroppable({
+  tableId,
+  tableLabel,
+  seatIndex,
+  children,
+}: {
+  tableId: string;
+  tableLabel: string;
+  seatIndex: number;
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `seat:${tableId}:${seatIndex}`,
+    data: { type: "seat", tableId, seatIndex },
+  });
+
   return (
-    <div className="flex flex-col gap-2 p-4">
-      {Array.from({ length: count }, (_, index) => (
-        <div
-          key={index}
-          className="h-10 w-24 shrink-0 rounded-md border border-dashed border-zinc-300 bg-zinc-50"
-          aria-label={`Seat ${index + 1}, empty`}
-        />
-      ))}
+    <div
+      ref={setNodeRef}
+      aria-label={`${tableLabel} seat ${seatIndex}`}
+      className={isOver ? "rounded-md ring-2 ring-zinc-900 ring-offset-2" : ""}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SeatCell({
+  tableId,
+  tableLabel,
+  seatIndex,
+  guest,
+  tableLabels,
+  interactive,
+  onUnseat,
+}: {
+  tableId: string;
+  tableLabel: string;
+  seatIndex: number;
+  guest: SeatingGuest | null;
+  tableLabels: Record<string, string>;
+  interactive: boolean;
+  onUnseat?: (guestId: string) => void;
+}) {
+  const assignment = guest
+    ? guestAssignmentLabel(guest, tableLabels)
+    : "";
+  const unseat =
+    guest == null || !onUnseat ? null : (
+      <UnseatGuestButton
+        guestName={guest.name}
+        onUnseat={() => onUnseat(guest.id)}
+      />
+    );
+
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className="w-5 shrink-0 text-center text-xs font-medium text-zinc-500"
+        aria-hidden
+      >
+        {seatIndex}
+      </span>
+      {interactive ? (
+        <SeatDroppable
+          tableId={tableId}
+          tableLabel={tableLabel}
+          seatIndex={seatIndex}
+        >
+          {guest ? (
+            <div className="relative">
+              <DraggableGuestCard
+                guest={guest}
+                assignment={assignment}
+                dragId={`seat-guest:${guest.id}`}
+                className="pr-8"
+              />
+              {unseat}
+            </div>
+          ) : (
+            <div className={`${GUEST_CARD_CLASS} border-dashed bg-zinc-50`} />
+          )}
+        </SeatDroppable>
+      ) : guest ? (
+        <div className="relative">
+          <StaticGuestCard
+            guest={guest}
+            assignment={assignment}
+            className="pr-8"
+          />
+          {unseat}
+        </div>
+      ) : (
+        <div className={`${GUEST_CARD_CLASS} border-dashed bg-zinc-50`} />
+      )}
     </div>
   );
 }
@@ -32,7 +135,11 @@ export function TableBoard({
   eventId,
   shareToken,
   tables,
+  guests,
+  tableLabels,
   listError,
+  interactive,
+  onUnseat,
 }: Props) {
   if (listError) {
     return (
@@ -45,7 +152,7 @@ export function TableBoard({
 
   if (tables.length === 0) {
     return (
-      <section className="flex flex-col items-start gap-4 rounded-md border border-dashed border-zinc-300 bg-white px-6 py-12">
+      <section className="flex w-full flex-col items-start gap-3">
         <h2 className="text-lg font-medium">Tables</h2>
         <p className="text-zinc-600">No tables yet. Create the first one.</p>
         <CreateTableButton
@@ -58,16 +165,18 @@ export function TableBoard({
   }
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg font-medium">Tables</h2>
-        <CreateTableButton
-          eventId={eventId}
-          shareToken={shareToken}
-          label="Add another table"
-        />
+    <section className="flex min-w-0 w-full flex-col gap-2">
+      <div className="flex items-start justify-between gap-4">
+        <h2 className="sr-only">Tables</h2>
+        <div className="ml-auto">
+          <CreateTableButton
+            eventId={eventId}
+            shareToken={shareToken}
+            label="Add another table"
+          />
+        </div>
       </div>
-      <div className="-mx-1 flex min-w-0 flex-row items-start gap-4 overflow-x-auto pb-2">
+      <div className="-mx-1 flex min-w-0 flex-row items-start gap-6 overflow-x-auto pb-2">
         {tables.map((table) => (
           <article
             key={table.id}
@@ -82,7 +191,23 @@ export function TableBoard({
                 tableLabel={table.label}
               />
             </header>
-            <EmptySeats count={table.seatCount} />
+            <div className="flex flex-col gap-2 p-3">
+              {Array.from({ length: table.seatCount }, (_, index) => {
+                const seatIndex = index + 1;
+                return (
+                  <SeatCell
+                    key={seatIndex}
+                    tableId={table.id}
+                    tableLabel={table.label}
+                    seatIndex={seatIndex}
+                    guest={guestBySeat(guests, table.id, seatIndex)}
+                    tableLabels={tableLabels}
+                    interactive={interactive}
+                    onUnseat={onUnseat}
+                  />
+                );
+              })}
+            </div>
           </article>
         ))}
       </div>
