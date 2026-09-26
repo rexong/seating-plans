@@ -1,12 +1,12 @@
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
-import { EventSeating } from "@/app/components/event-seating";
+import { SeatingExport } from "@/app/components/seating-export";
 import { getEventByShareToken } from "@/db/events";
 import { listGuestsForEvent } from "@/db/guests";
 import { listTablesForEvent } from "@/db/tables";
 
-export default async function EventPage(
-  props: PageProps<"/events/[shareToken]">,
+export default async function EventExportPage(
+  props: PageProps<"/events/[shareToken]/export">,
 ) {
   await connection();
   const { shareToken } = await props.params;
@@ -36,9 +36,8 @@ export default async function EventPage(
   }
 
   return (
-    <main className="flex h-dvh w-full min-w-0 flex-col overflow-hidden px-6 py-4">
-      <EventSeating
-        eventId={event.id}
+    <main className="min-h-dvh w-full bg-zinc-50">
+      <SeatingExport
         shareToken={event.shareToken}
         eventName={event.name}
         guests={guests}

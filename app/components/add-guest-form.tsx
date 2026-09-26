@@ -9,6 +9,9 @@ type Props = {
   trailing?: React.ReactNode;
 };
 
+const fieldClass =
+  "min-w-0 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm";
+
 export function AddGuestForm({ eventId, shareToken, trailing }: Props) {
   const [state, action, pending] = useActionState(createGuestAction, null);
 
@@ -19,20 +22,40 @@ export function AddGuestForm({ eventId, shareToken, trailing }: Props) {
       <label className="text-sm font-medium text-zinc-700" htmlFor="guest-name">
         Add guest
       </label>
+      <input
+        id="guest-name"
+        name="name"
+        required
+        maxLength={120}
+        placeholder="Display name"
+        className={fieldClass}
+      />
+      <label className="sr-only" htmlFor="guest-designation">
+        Designation
+      </label>
+      <input
+        id="guest-designation"
+        name="designation"
+        maxLength={120}
+        placeholder="Designation"
+        className={fieldClass}
+      />
+      <label className="sr-only" htmlFor="guest-organisation">
+        Organisation
+      </label>
+      <input
+        id="guest-organisation"
+        name="organisation"
+        maxLength={120}
+        placeholder="Organisation"
+        className={fieldClass}
+      />
       <div className="flex items-center gap-1.5">
-        <input
-          id="guest-name"
-          name="name"
-          required
-          maxLength={120}
-          placeholder="Display name"
-          className="min-w-0 flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-        />
         {trailing}
         <button
           type="submit"
           disabled={pending}
-          className="shrink-0 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="min-w-0 flex-1 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
           {pending ? "…" : "Add"}
         </button>

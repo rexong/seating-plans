@@ -11,6 +11,7 @@ import {
   updateGuestColour,
 } from "@/db/guests";
 import { isBasicAuthorized } from "@/lib/basic-auth";
+import { emptyToNull, parseBulkGuestLine } from "@/lib/guest-fields";
 import { GUEST_COLOURS } from "@/lib/guest-colours";
 
 const guestNameSchema = z
@@ -18,6 +19,11 @@ const guestNameSchema = z
   .trim()
   .min(1, "Name is required")
   .max(120, "Name is too long");
+
+const optionalFieldSchema = z
+  .string()
+  .max(120, "Value is too long")
+  .transform((value) => emptyToNull(value));
 
 const colourSchema = z
   .string()
@@ -59,12 +65,21 @@ export async function createGuestAction(
   const eventId = eventIdSchema.safeParse(formData.get("eventId"));
   const shareToken = z.string().min(1).safeParse(formData.get("shareToken"));
   const name = guestNameSchema.safeParse(formData.get("name"));
+  const designation = optionalFieldSchema.safeParse(
+    formData.get("designation") ?? "",
+  );
+  const organisation = optionalFieldSchema.safeParse(
+    formData.get("organisation") ?? "",
+  );
 
   if (!eventId.success || !shareToken.success) {
     return { error: "Invalid event" };
   }
   if (!name.success) {
     return { error: name.error.issues[0]?.message ?? "Invalid name" };
+  }
+  if (!designation.success || !organisation.success) {
+    return { error: "Designation or organisation is too long" };
   }
 
   const event = await eventPath(eventId.data, shareToken.data);
@@ -75,6 +90,8 @@ export async function createGuestAction(
   await createGuest({
     eventId: event.id,
     name: name.data,
+    designation: designation.data,
+    organisation: organisation.data,
   });
   revalidatePath(`/events/${event.shareToken}`);
   return null;
@@ -88,10 +105,10 @@ export async function createGuestsBulkAction(
 
   const eventId = eventIdSchema.safeParse(formData.get("eventId"));
   const shareToken = z.string().min(1).safeParse(formData.get("shareToken"));
-  const rawNames = typeof formData.get("names") === "string"
+  const rawLines = typeof formData.get("names") === "string"
     ? String(formData.get("names"))
     : "";
-  const names = rawNames
+  const lines = rawLines
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
@@ -99,16 +116,33 @@ export async function createGuestsBulkAction(
   if (!eventId.success || !shareToken.success) {
     return { error: "Invalid event" };
   }
-  if (names.length === 0) {
-    return { error: "Paste at least one name" };
+  if (lines.length === 0) {
+    return { error: "Paste at least one guest" };
   }
-  if (names.length > 200) {
-    return { error: "Too many names in one batch" };
+  if (lines.length > 200) {
+    return { error: "Too many guests in one batch" };
   }
 
-  const parsedNames = z.array(guestNameSchema).safeParse(names);
-  if (!parsedNames.success) {
-    return { error: "One or more names are invalid" };
+  const guests = [];
+  for (const line of lines) {
+    const parsed = parseBulkGuestLine(line);
+    if (!parsed) {
+      return {
+        error:
+          "Each line must be name;designation;organisation (exactly two semicolons). Empty fields still need the separators, e.g. name;;",
+      };
+    }
+    const name = guestNameSchema.safeParse(parsed.name);
+    const designation = optionalFieldSchema.safeParse(parsed.designation ?? "");
+    const organisation = optionalFieldSchema.safeParse(parsed.organisation ?? "");
+    if (!name.success || !designation.success || !organisation.success) {
+      return { error: "One or more guests are invalid" };
+    }
+    guests.push({
+      name: name.data,
+      designation: designation.data,
+      organisation: organisation.data,
+    });
   }
 
   const event = await eventPath(eventId.data, shareToken.data);
@@ -118,7 +152,7 @@ export async function createGuestsBulkAction(
 
   await createGuests({
     eventId: event.id,
-    names: parsedNames.data,
+    guests,
   });
   revalidatePath(`/events/${event.shareToken}`);
   return null;

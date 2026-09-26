@@ -78,7 +78,7 @@ function guestsKey(rows: SeatingGuest[]) {
   return rows
     .map(
       (guest) =>
-        `${guest.id}:${guest.colour ?? ""}:${guest.name}:${guest.tableId ?? ""}:${guest.seatIndex ?? ""}`,
+        `${guest.id}:${guest.colour ?? ""}:${guest.name}:${guest.designation ?? ""}:${guest.organisation ?? ""}:${guest.tableId ?? ""}:${guest.seatIndex ?? ""}`,
     )
     .join(",");
 }
@@ -281,7 +281,7 @@ export function EventSeating({
           />
         </div>
       )}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         {sidebarOpen ? null : (
           <div className="mb-2 flex min-w-0 shrink-0 flex-col gap-1">
             <div className="flex items-center gap-3">
@@ -314,11 +314,15 @@ export function EventSeating({
   );
 
   if (!ready) {
-    return <div className="flex h-full min-h-0 flex-col">{board}</div>;
+    return (
+      <div className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col">
+        {board}
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col">
       <DndContext
         id={`event-seating-${eventId}`}
         sensors={sensors}
@@ -329,10 +333,10 @@ export function EventSeating({
         onDragCancel={() => setActiveGuest(null)}
       >
         {error ? <p className="shrink-0 text-sm text-red-700">{error}</p> : null}
-        <div className="min-h-0 flex-1">{board}</div>
+        <div className="min-h-0 w-full min-w-0 flex-1">{board}</div>
         <DragOverlay dropAnimation={null}>
           {activeGuest ? (
-            <div className={`${GUEST_CARD_CLASS} cursor-grabbing shadow-lg`}>
+            <div className={`${GUEST_CARD_CLASS} w-60 cursor-grabbing shadow-lg`}>
               <GuestCardFace
                 guest={activeGuest}
                 assignment={guestAssignmentLabel(activeGuest, tableLabels)}

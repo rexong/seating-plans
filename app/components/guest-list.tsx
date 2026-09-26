@@ -197,7 +197,13 @@ export function GuestSidebar({
     if (!needle) {
       return byColour;
     }
-    return byColour.filter((guest) => guest.name.toLowerCase().includes(needle));
+    return byColour.filter((guest) => {
+      const haystack = [guest.name, guest.designation, guest.organisation]
+        .filter((part): part is string => Boolean(part))
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(needle);
+    });
   }, [colourFilter, guests, query, tab]);
 
   const emptyMessage = query.trim()
@@ -220,7 +226,7 @@ export function GuestSidebar({
           ? (colour: string | null) => onColourChange(guest.id, colour)
           : undefined;
         return (
-          <div key={guest.id} className="flex items-center gap-1">
+          <div key={guest.id} className="flex items-start gap-1">
             {interactive ? (
               <DraggableGuestCard
                 guest={guest}
@@ -288,7 +294,7 @@ export function GuestSidebar({
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Find a name"
+              placeholder="Name, designation, or organisation"
               className="min-w-0 flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
             />
             <ColourFilterButton value={colourFilter} onChange={setColourFilter} />

@@ -8,26 +8,49 @@ import {
   guestColourDotClass,
   guestColourLabel,
 } from "@/lib/guest-colours";
+import { guestRoleLine } from "@/lib/guest-fields";
 import type { SeatingGuest } from "@/lib/seating";
 
 export const GUEST_CARD_CLASS =
-  "flex h-14 w-60 min-w-60 items-center gap-2 rounded-md border border-zinc-200 bg-white px-3";
+  "flex min-h-14 w-full min-w-0 items-start gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2";
 
 type FaceProps = {
   guest: SeatingGuest;
   assignment: string;
+  wrapAssignment?: boolean;
 };
 
-export function GuestCardFace({ guest, assignment }: FaceProps) {
+export function GuestCardFace({
+  guest,
+  assignment,
+  wrapAssignment = false,
+}: FaceProps) {
+  const role = guestRoleLine(guest);
+
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-2">
+    <div className="flex min-w-0 flex-1 items-start gap-2">
       <span
         aria-hidden
-        className={`size-3 shrink-0 rounded-full ${guestColourDotClass(guest.colour)}`}
+        className={`mt-1 size-3 shrink-0 rounded-full ${guestColourDotClass(guest.colour)}`}
       />
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-zinc-900">{guest.name}</p>
-        <p className="h-4 truncate text-xs text-zinc-500">{assignment}</p>
+        <p className="text-sm font-medium break-words whitespace-normal text-zinc-900">
+          {guest.name}
+        </p>
+        {role ? (
+          <p className="text-xs break-words whitespace-normal text-zinc-600">
+            {role}
+          </p>
+        ) : null}
+        <p
+          className={`text-xs text-zinc-500 ${
+            wrapAssignment
+              ? "break-words whitespace-normal"
+              : "truncate"
+          }`}
+        >
+          {assignment}
+        </p>
       </div>
     </div>
   );
@@ -146,7 +169,7 @@ export function StaticGuestCard({
   const colour = useColourClick(Boolean(onColourChange));
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 w-full flex-1">
       <div
         className={`${GUEST_CARD_CLASS} ${onColourChange ? "cursor-pointer" : ""} ${className}`}
         onClick={colour.onClick}
@@ -188,7 +211,7 @@ export function DraggableGuestCard({
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 w-full flex-1">
       <div
         ref={setNodeRef}
         className={`${GUEST_CARD_CLASS} cursor-grab touch-none active:cursor-grabbing ${

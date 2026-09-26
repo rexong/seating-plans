@@ -36,3 +36,21 @@ select {
   cursor: pointer;
   user-select: none;
 }
+
+@media print {
+  html,
+  body {
+    background: white !important;
+    user-select: text;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .export-table {
+    break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

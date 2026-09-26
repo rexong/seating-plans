@@ -5,6 +5,8 @@ export type SeatTarget =
 export type SeatingGuest = {
   id: string;
   name: string;
+  designation: string | null;
+  organisation: string | null;
   colour: string | null;
   tableId: string | null;
   seatIndex: number | null;

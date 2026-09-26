@@ -43,6 +43,8 @@ export const guests = pgTable(
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
+    designation: text("designation"),
+    organisation: text("organisation"),
     colour: text("colour"),
     tableId: uuid("table_id").references(() => tables.id, {
       onDelete: "set null",

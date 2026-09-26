@@ -25,7 +25,7 @@ Assigning guests to tables is fiddly in spreadsheets. The operator needs one pla
 
 - Create and delete events.
 - Add one guest, bulk-add guests, delete a guest, search/find a guest.
-- Guest fields: **display name** and **colour tag** only (party / dietary / VIP style labels).
+- Guest fields: **display name**, optional **designation** and **organisation**, and **colour tag**.
 - Add and remove tables. Each table has **8–10 seats**.
 - Tabular view of tables and seats.
 - Drag unseated guest onto a seat; move between seats/tables; return to unseated; **swap** if the target seat is occupied.
@@ -40,7 +40,7 @@ Assigning guests to tables is fiddly in spreadsheets. The operator needs one pla
 - Editor locks / occupancy (document the limitation: last write can overwrite).
 - Mobile / touch-first layout.
 - Floor-plan canvas, table shapes, or room geometry.
-- Guest notes, households, dietary fields, plus-ones as first-class data.
+- Guest notes, households, dietary fields, plus-ones as first-class data (beyond designation and organisation).
 - View-only links, per-user accounts, OAuth, or email invites.
 - Payments, orgs, audit logs, or export/print polish beyond what a later phase adds.
 

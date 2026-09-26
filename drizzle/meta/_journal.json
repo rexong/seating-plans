@@ -36,6 +36,13 @@
       "when": 1790440361770,
       "tag": "0004_seating",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790445403424,
+      "tag": "0005_guest_org",
+      "breakpoints": true
     }
   ]
 }

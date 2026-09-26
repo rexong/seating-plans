@@ -1,6 +1,7 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
+import Link from "next/link";
 import { CreateTableButton } from "@/app/components/create-table-button";
 import { DeleteTableButton } from "@/app/components/delete-table-button";
 import {
@@ -53,7 +54,9 @@ function SeatDroppable({
     <div
       ref={setNodeRef}
       aria-label={`${tableLabel} seat ${seatIndex}`}
-      className={isOver ? "rounded-md ring-2 ring-zinc-900 ring-offset-2" : ""}
+      className={`min-w-0 flex-1 ${
+        isOver ? "rounded-md ring-2 ring-zinc-900 ring-offset-2" : ""
+      }`}
     >
       {children}
     </div>
@@ -91,9 +94,9 @@ function SeatCell({
     );
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-start gap-2">
       <span
-        className="w-5 shrink-0 text-center text-xs font-medium text-zinc-500"
+        className="mt-2.5 w-5 shrink-0 text-center text-xs font-medium text-zinc-500"
         aria-hidden
       >
         {seatIndex}
@@ -105,7 +108,7 @@ function SeatCell({
           seatIndex={seatIndex}
         >
           {guest ? (
-            <div className="relative">
+            <div className="relative w-full">
               <DraggableGuestCard
                 guest={guest}
                 assignment={assignment}
@@ -124,7 +127,7 @@ function SeatCell({
           )}
         </SeatDroppable>
       ) : guest ? (
-        <div className="relative">
+        <div className="relative w-full">
           <StaticGuestCard
             guest={guest}
             assignment={assignment}
@@ -179,10 +182,16 @@ export function TableBoard({
   }
 
   return (
-    <section className="flex min-h-0 min-w-0 w-full flex-1 flex-col gap-2">
-      <div className="flex shrink-0 items-start justify-between gap-4">
+    <section className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
+      <div className="flex shrink-0 items-start justify-between gap-4 pb-2">
         <h2 className="sr-only">Tables</h2>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-start gap-2">
+          <Link
+            href={`/events/${shareToken}/export`}
+            className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
+          >
+            Export
+          </Link>
           <CreateTableButton
             eventId={eventId}
             shareToken={shareToken}
@@ -190,11 +199,12 @@ export function TableBoard({
           />
         </div>
       </div>
-      <div className="-mx-1 flex min-h-0 min-w-0 flex-1 flex-row items-start gap-6 overflow-auto pb-2">
-        {tables.map((table) => (
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pb-2">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(18.5rem,1fr))] gap-6">
+          {tables.map((table) => (
           <article
             key={table.id}
-            className="w-max shrink-0 overflow-hidden rounded-md border border-zinc-200 bg-white"
+            className="min-w-0 overflow-hidden rounded-md border border-zinc-200 bg-white"
           >
             <header className="flex items-center justify-between gap-3 border-b border-zinc-200 px-4 py-2">
               <h3 className="font-medium text-zinc-900">{table.label}</h3>
@@ -224,7 +234,8 @@ export function TableBoard({
               })}
             </div>
           </article>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

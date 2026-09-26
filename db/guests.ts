@@ -14,6 +14,8 @@ export async function listGuestsForEvent(eventId: string) {
 export async function createGuest(input: {
   eventId: string;
   name: string;
+  designation?: string | null;
+  organisation?: string | null;
 }) {
   const db = getDb();
   const [guest] = await db.insert(guests).values(input).returning();
@@ -22,9 +24,13 @@ export async function createGuest(input: {
 
 export async function createGuests(input: {
   eventId: string;
-  names: string[];
+  guests: {
+    name: string;
+    designation: string | null;
+    organisation: string | null;
+  }[];
 }) {
-  if (input.names.length === 0) {
+  if (input.guests.length === 0) {
     return [];
   }
 
@@ -32,9 +38,11 @@ export async function createGuests(input: {
   return db
     .insert(guests)
     .values(
-      input.names.map((name) => ({
+      input.guests.map((guest) => ({
         eventId: input.eventId,
-        name,
+        name: guest.name,
+        designation: guest.designation,
+        organisation: guest.organisation,
       })),
     )
     .returning();
