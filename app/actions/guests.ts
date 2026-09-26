@@ -4,7 +4,12 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getEventByShareToken } from "@/db/events";
-import { createGuest, createGuests, deleteGuestById } from "@/db/guests";
+import {
+  createGuest,
+  createGuests,
+  deleteGuestById,
+  updateGuestColour,
+} from "@/db/guests";
 import { isBasicAuthorized } from "@/lib/basic-auth";
 import { GUEST_COLOURS } from "@/lib/guest-colours";
 
@@ -54,16 +59,12 @@ export async function createGuestAction(
   const eventId = eventIdSchema.safeParse(formData.get("eventId"));
   const shareToken = z.string().min(1).safeParse(formData.get("shareToken"));
   const name = guestNameSchema.safeParse(formData.get("name"));
-  const colour = colourSchema.safeParse(formData.get("colour") ?? "none");
 
   if (!eventId.success || !shareToken.success) {
     return { error: "Invalid event" };
   }
   if (!name.success) {
     return { error: name.error.issues[0]?.message ?? "Invalid name" };
-  }
-  if (!colour.success) {
-    return { error: "Invalid colour" };
   }
 
   const event = await eventPath(eventId.data, shareToken.data);
@@ -74,7 +75,6 @@ export async function createGuestAction(
   await createGuest({
     eventId: event.id,
     name: name.data,
-    colour: colour.data,
   });
   revalidatePath(`/events/${event.shareToken}`);
   return null;
@@ -88,7 +88,6 @@ export async function createGuestsBulkAction(
 
   const eventId = eventIdSchema.safeParse(formData.get("eventId"));
   const shareToken = z.string().min(1).safeParse(formData.get("shareToken"));
-  const colour = colourSchema.safeParse(formData.get("colour") ?? "none");
   const rawNames = typeof formData.get("names") === "string"
     ? String(formData.get("names"))
     : "";
@@ -111,9 +110,6 @@ export async function createGuestsBulkAction(
   if (!parsedNames.success) {
     return { error: "One or more names are invalid" };
   }
-  if (!colour.success) {
-    return { error: "Invalid colour" };
-  }
 
   const event = await eventPath(eventId.data, shareToken.data);
   if (!event) {
@@ -123,7 +119,6 @@ export async function createGuestsBulkAction(
   await createGuests({
     eventId: event.id,
     names: parsedNames.data,
-    colour: colour.data,
   });
   revalidatePath(`/events/${event.shareToken}`);
   return null;
@@ -149,6 +144,40 @@ export async function deleteGuestAction(
   }
 
   await deleteGuestById(event.id, guestId.data);
+  revalidatePath(`/events/${event.shareToken}`);
+  return null;
+}
+
+export async function updateGuestColourAction(input: {
+  eventId: string;
+  shareToken: string;
+  guestId: string;
+  colour: string | null;
+}): Promise<GuestActionState> {
+  await assertAuthorized();
+
+  const eventId = eventIdSchema.safeParse(input.eventId);
+  const shareToken = z.string().min(1).safeParse(input.shareToken);
+  const guestId = guestIdSchema.safeParse(input.guestId);
+  const colour = colourSchema.safeParse(input.colour ?? "none");
+
+  if (!eventId.success || !shareToken.success || !guestId.success) {
+    return { error: "Invalid guest" };
+  }
+  if (!colour.success) {
+    return { error: "Invalid colour" };
+  }
+
+  const event = await eventPath(eventId.data, shareToken.data);
+  if (!event) {
+    return { error: "Event not found" };
+  }
+
+  const guest = await updateGuestColour(event.id, guestId.data, colour.data);
+  if (!guest) {
+    return { error: "Guest not found" };
+  }
+
   revalidatePath(`/events/${event.shareToken}`);
   return null;
 }

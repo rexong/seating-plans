@@ -14,7 +14,6 @@ export async function listGuestsForEvent(eventId: string) {
 export async function createGuest(input: {
   eventId: string;
   name: string;
-  colour: string | null;
 }) {
   const db = getDb();
   const [guest] = await db.insert(guests).values(input).returning();
@@ -24,7 +23,6 @@ export async function createGuest(input: {
 export async function createGuests(input: {
   eventId: string;
   names: string[];
-  colour: string | null;
 }) {
   if (input.names.length === 0) {
     return [];
@@ -37,10 +35,23 @@ export async function createGuests(input: {
       input.names.map((name) => ({
         eventId: input.eventId,
         name,
-        colour: input.colour,
       })),
     )
     .returning();
+}
+
+export async function updateGuestColour(
+  eventId: string,
+  guestId: string,
+  colour: string | null,
+) {
+  const db = getDb();
+  const [guest] = await db
+    .update(guests)
+    .set({ colour, updatedAt: new Date() })
+    .where(and(eq(guests.id, guestId), eq(guests.eventId, eventId)))
+    .returning();
+  return guest ?? null;
 }
 
 export async function getGuestForEvent(eventId: string, guestId: string) {

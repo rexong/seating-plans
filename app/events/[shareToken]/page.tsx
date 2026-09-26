@@ -36,7 +36,7 @@ export default async function EventPage(
   }
 
   return (
-    <main className="flex min-h-screen w-full max-w-none px-6 pt-6 pb-12">
+    <main className="flex h-dvh w-full max-w-none overflow-hidden px-6 py-4">
       <EventSeating
         eventId={event.id}
         shareToken={event.shareToken}

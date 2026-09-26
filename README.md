@@ -44,7 +44,7 @@ On Vercel, set the same three secrets. There is no OAuth or per-user accounts.
 
 1. Sign in with Basic Auth.
 2. Create an event on `/`. Each event has a share token in the path: `/events/[shareToken]`.
-3. Add guests (one at a time or paste names). Search and filter with **All / Seated / To seat**.
+3. Add guests by name (one at a time, or the bulk-add icon next to the name field). Click a guest card to set colour. Search sits with the guest list; filter with **All / Seated / To seat**.
 4. Add tables. Each table has **10** seats. Deleting a table unseats anyone on it.
 5. Drag guests onto empty seats, between seats, or back to the guest list. Dropping on an occupied seat **swaps** the two guests.
 6. Guest colour stays on the person. Cards show `Table · Seat N` or `No seat`. The event header shows **total / seated / unseated** (derived from assignments, not stored).

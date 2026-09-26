@@ -17,6 +17,7 @@ import {
 } from "@dnd-kit/core";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore, useTransition } from "react";
+import { updateGuestColourAction } from "@/app/actions/guests";
 import { assignSeatAction } from "@/app/actions/seating";
 import { GuestCardFace, GUEST_CARD_CLASS } from "@/app/components/guest-card";
 import { GuestSidebar } from "@/app/components/guest-list";
@@ -74,7 +75,12 @@ const seatingCollision: CollisionDetection = (args) => {
 };
 
 function guestsKey(rows: SeatingGuest[]) {
-  return rows.map((guest) => guest.id).join(",");
+  return rows
+    .map(
+      (guest) =>
+        `${guest.id}:${guest.colour ?? ""}:${guest.name}:${guest.tableId ?? ""}:${guest.seatIndex ?? ""}`,
+    )
+    .join(",");
 }
 
 function EventCountStrip({ guests }: { guests: SeatingGuest[] }) {
@@ -182,6 +188,28 @@ export function EventSeating({
     });
   }
 
+  function persistColour(guestId: string, colour: string | null) {
+    const previous = seatedGuests;
+    const next = previous.map((guest) =>
+      guest.id === guestId ? { ...guest, colour } : guest,
+    );
+    setSeatedGuests(next);
+    setError(null);
+
+    startTransition(async () => {
+      const result = await updateGuestColourAction({
+        eventId,
+        shareToken,
+        guestId,
+        colour,
+      });
+      if (result?.error) {
+        setSeatedGuests(previous);
+        setError(result.error);
+      }
+    });
+  }
+
   function onDragStart(event: DragStartEvent) {
     const guestId = event.active.data.current?.guestId;
     setActiveGuest(seatedGuests.find((guest) => guest.id === guestId) ?? null);
@@ -210,15 +238,15 @@ export function EventSeating({
   }
 
   const board = (
-    <div className="flex min-h-0 w-full min-w-0 items-start">
+    <div className="flex h-full min-h-0 w-full min-w-0 items-stretch">
       <div
         id="guest-sidebar"
-        className={`overflow-hidden transition-[width,margin] duration-300 ease-out ${
+        className={`h-full overflow-hidden transition-[width,margin] duration-300 ease-out ${
           sidebarOpen ? "mr-8 w-[18.5rem]" : "mr-0 w-0"
         }`}
       >
-        <div className="flex w-[18.5rem] flex-col gap-5">
-          <div className="flex items-start justify-between gap-2">
+        <div className="flex h-full w-[18.5rem] min-h-0 flex-col gap-3">
+          <div className="flex shrink-0 items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col gap-2">
               <h1 className="text-3xl font-semibold tracking-tight">{eventName}</h1>
               <EventCountStrip guests={seatedGuests} />
@@ -241,6 +269,7 @@ export function EventSeating({
             tableLabels={tableLabels}
             listError={guestError}
             interactive={ready && sidebarOpen}
+            onColourChange={persistColour}
           />
         </div>
       </div>
@@ -252,9 +281,9 @@ export function EventSeating({
           />
         </div>
       )}
-      <div className="min-w-0 flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {sidebarOpen ? null : (
-          <div className="mb-2 flex min-w-0 flex-col gap-1">
+          <div className="mb-2 flex min-w-0 shrink-0 flex-col gap-1">
             <div className="flex items-center gap-3">
               <h1 className="min-w-0 truncate text-xl font-semibold tracking-tight">
                 {eventName}
@@ -278,37 +307,40 @@ export function EventSeating({
           listError={tableError}
           interactive={ready}
           onUnseat={(guestId) => persistMove(guestId, { type: "unseated" })}
+          onColourChange={persistColour}
         />
       </div>
     </div>
   );
 
   if (!ready) {
-    return board;
+    return <div className="flex h-full min-h-0 flex-col">{board}</div>;
   }
 
   return (
-    <DndContext
-      id={`event-seating-${eventId}`}
-      sensors={sensors}
-      collisionDetection={seatingCollision}
-      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragCancel={() => setActiveGuest(null)}
-    >
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
-      {board}
-      <DragOverlay dropAnimation={null}>
-        {activeGuest ? (
-          <div className={`${GUEST_CARD_CLASS} cursor-grabbing shadow-lg`}>
-            <GuestCardFace
-              guest={activeGuest}
-              assignment={guestAssignmentLabel(activeGuest, tableLabels)}
-            />
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+    <div className="flex h-full min-h-0 flex-col">
+      <DndContext
+        id={`event-seating-${eventId}`}
+        sensors={sensors}
+        collisionDetection={seatingCollision}
+        measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragCancel={() => setActiveGuest(null)}
+      >
+        {error ? <p className="shrink-0 text-sm text-red-700">{error}</p> : null}
+        <div className="min-h-0 flex-1">{board}</div>
+        <DragOverlay dropAnimation={null}>
+          {activeGuest ? (
+            <div className={`${GUEST_CARD_CLASS} cursor-grabbing shadow-lg`}>
+              <GuestCardFace
+                guest={activeGuest}
+                assignment={guestAssignmentLabel(activeGuest, tableLabels)}
+              />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
   );
 }

@@ -30,6 +30,7 @@ type Props = {
   listError: string | null;
   interactive: boolean;
   onUnseat?: (guestId: string) => void;
+  onColourChange?: (guestId: string, colour: string | null) => void;
 };
 
 function SeatDroppable({
@@ -67,6 +68,7 @@ function SeatCell({
   tableLabels,
   interactive,
   onUnseat,
+  onColourChange,
 }: {
   tableId: string;
   tableLabel: string;
@@ -75,6 +77,7 @@ function SeatCell({
   tableLabels: Record<string, string>;
   interactive: boolean;
   onUnseat?: (guestId: string) => void;
+  onColourChange?: (guestId: string, colour: string | null) => void;
 }) {
   const assignment = guest
     ? guestAssignmentLabel(guest, tableLabels)
@@ -108,6 +111,11 @@ function SeatCell({
                 assignment={assignment}
                 dragId={`seat-guest:${guest.id}`}
                 className="pr-8"
+                onColourChange={
+                  onColourChange
+                    ? (colour) => onColourChange(guest.id, colour)
+                    : undefined
+                }
               />
               {unseat}
             </div>
@@ -121,6 +129,11 @@ function SeatCell({
             guest={guest}
             assignment={assignment}
             className="pr-8"
+            onColourChange={
+              onColourChange
+                ? (colour) => onColourChange(guest.id, colour)
+                : undefined
+            }
           />
           {unseat}
         </div>
@@ -140,6 +153,7 @@ export function TableBoard({
   listError,
   interactive,
   onUnseat,
+  onColourChange,
 }: Props) {
   if (listError) {
     return (
@@ -165,8 +179,8 @@ export function TableBoard({
   }
 
   return (
-    <section className="flex min-w-0 w-full flex-col gap-2">
-      <div className="flex items-start justify-between gap-4">
+    <section className="flex min-h-0 min-w-0 w-full flex-1 flex-col gap-2">
+      <div className="flex shrink-0 items-start justify-between gap-4">
         <h2 className="sr-only">Tables</h2>
         <div className="ml-auto">
           <CreateTableButton
@@ -176,7 +190,7 @@ export function TableBoard({
           />
         </div>
       </div>
-      <div className="-mx-1 flex min-w-0 flex-row items-start gap-6 overflow-x-auto pb-2">
+      <div className="-mx-1 flex min-h-0 min-w-0 flex-1 flex-row items-start gap-6 overflow-auto pb-2">
         {tables.map((table) => (
           <article
             key={table.id}
@@ -204,6 +218,7 @@ export function TableBoard({
                     tableLabels={tableLabels}
                     interactive={interactive}
                     onUnseat={onUnseat}
+                    onColourChange={onColourChange}
                   />
                 );
               })}
