@@ -24,6 +24,7 @@ import { TableBoard } from "@/app/components/table-board";
 import {
   applySeatMove,
   guestAssignmentLabel,
+  seatingCounts,
   seatTargetFromOverId,
   type SeatTarget,
   type SeatingGuest,
@@ -74,6 +75,15 @@ const seatingCollision: CollisionDetection = (args) => {
 
 function guestsKey(rows: SeatingGuest[]) {
   return rows.map((guest) => guest.id).join(",");
+}
+
+function EventCountStrip({ guests }: { guests: SeatingGuest[] }) {
+  const { total, seated, unseated } = seatingCounts(guests);
+  return (
+    <p className="text-sm text-zinc-600">
+      {total} total · {seated} seated · {unseated} unseated
+    </p>
+  );
 }
 
 function SidebarToggle({
@@ -211,6 +221,7 @@ export function EventSeating({
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col gap-2">
               <h1 className="text-3xl font-semibold tracking-tight">{eventName}</h1>
+              <EventCountStrip guests={seatedGuests} />
               <Link
                 href="/"
                 className="text-sm font-medium text-zinc-900 underline-offset-2 hover:underline"
@@ -243,16 +254,19 @@ export function EventSeating({
       )}
       <div className="min-w-0 flex-1">
         {sidebarOpen ? null : (
-          <div className="mb-2 flex items-center gap-3">
-            <h1 className="min-w-0 truncate text-xl font-semibold tracking-tight">
-              {eventName}
-            </h1>
-            <Link
-              href="/"
-              className="shrink-0 text-sm font-medium text-zinc-900 underline-offset-2 hover:underline"
-            >
-              Back to events
-            </Link>
+          <div className="mb-2 flex min-w-0 flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <h1 className="min-w-0 truncate text-xl font-semibold tracking-tight">
+                {eventName}
+              </h1>
+              <Link
+                href="/"
+                className="shrink-0 text-sm font-medium text-zinc-900 underline-offset-2 hover:underline"
+              >
+                Back to events
+              </Link>
+            </div>
+            <EventCountStrip guests={seatedGuests} />
           </div>
         )}
         <TableBoard

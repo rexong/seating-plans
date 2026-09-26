@@ -26,7 +26,7 @@ export function DeleteTableButton({
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`Delete ${tableLabel}`}
-        className="rounded-md p-1 text-zinc-500 hover:bg-zinc-100 hover:text-red-700"
+        className="rounded-md p-1 text-red-700 hover:bg-red-50"
       >
         <svg
           viewBox="0 0 20 20"

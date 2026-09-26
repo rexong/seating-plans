@@ -83,6 +83,17 @@ export function isSeated(
   return guest.tableId != null && guest.seatIndex != null;
 }
 
+export function seatingCounts(
+  guests: { tableId: string | null; seatIndex: number | null }[],
+) {
+  const seated = guests.filter(isSeated).length;
+  return {
+    total: guests.length,
+    seated,
+    unseated: guests.length - seated,
+  };
+}
+
 export function guestBySeat<
   T extends { tableId: string | null; seatIndex: number | null },
 >(guests: T[], tableId: string, seatIndex: number) {
