@@ -22,7 +22,7 @@ type Props = {
   listError: string | null;
 };
 
-export function GuestWorkspace({
+export function GuestSidebar({
   eventId,
   shareToken,
   guests,
@@ -39,24 +39,22 @@ export function GuestWorkspace({
   }, [guests, query]);
 
   return (
-    <div className="grid gap-8 md:grid-cols-[16rem_minmax(0,1fr)]">
-      <aside className="flex flex-col gap-5">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-zinc-700" htmlFor="guest-search">
-            Search
-          </label>
-          <input
-            id="guest-search"
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Find a name"
-            className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-          />
-        </div>
-        <AddGuestForm eventId={eventId} shareToken={shareToken} />
-        <BulkAddGuests eventId={eventId} shareToken={shareToken} />
-      </aside>
+    <aside className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-zinc-700" htmlFor="guest-search">
+          Search
+        </label>
+        <input
+          id="guest-search"
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Find a name"
+          className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+        />
+      </div>
+      <AddGuestForm eventId={eventId} shareToken={shareToken} />
+      <BulkAddGuests eventId={eventId} shareToken={shareToken} />
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-medium">Guests</h2>
@@ -71,15 +69,15 @@ export function GuestWorkspace({
             {visible.map((guest) => (
               <li
                 key={guest.id}
-                className="flex items-center justify-between gap-4 px-4 py-3"
+                className="flex items-center justify-between gap-3 px-3 py-2"
               >
-                <div className="flex min-w-0 items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2">
                   <span
                     aria-hidden
                     className={`size-3 shrink-0 rounded-full ${guestColourDotClass(guest.colour)}`}
                   />
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-zinc-900">
+                    <p className="truncate text-sm font-medium text-zinc-900">
                       {guest.name}
                     </p>
                     <p className="text-xs text-zinc-500">
@@ -98,6 +96,6 @@ export function GuestWorkspace({
           </ul>
         )}
       </section>
-    </div>
+    </aside>
   );
 }

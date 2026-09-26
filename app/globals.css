@@ -1,1 +1,38 @@
 @import "tailwindcss";
+
+html,
+body {
+  cursor: default;
+  user-select: none;
+}
+
+button,
+a,
+[role="button"] {
+  cursor: pointer;
+}
+
+label {
+  cursor: default;
+  pointer-events: none;
+}
+
+input:is(
+    [type="text"],
+    [type="search"],
+    [type="email"],
+    [type="password"],
+    [type="url"],
+    [type="tel"],
+    [type="number"],
+    :not([type])
+  ),
+textarea {
+  cursor: text;
+  user-select: text;
+}
+
+select {
+  cursor: pointer;
+  user-select: none;
+}

@@ -1,0 +1,77 @@
+"use server";
+
+import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { getEventByShareToken } from "@/db/events";
+import { createTable, deleteTableById } from "@/db/tables";
+import { isBasicAuthorized } from "@/lib/basic-auth";
+
+const eventIdSchema = z.string().uuid();
+const tableIdSchema = z.string().uuid();
+
+export type TableActionState = { error?: string } | null;
+
+async function assertAuthorized() {
+  const headerList = await headers();
+  if (!isBasicAuthorized(headerList.get("authorization"))) {
+    throw new Error("Unauthorized");
+  }
+}
+
+async function eventPath(eventId: string, shareToken: string) {
+  const event = await getEventByShareToken(shareToken);
+  if (!event || event.id !== eventId) {
+    return null;
+  }
+  return event;
+}
+
+export async function createTableAction(
+  _prev: TableActionState,
+  formData: FormData,
+): Promise<TableActionState> {
+  await assertAuthorized();
+
+  const eventId = eventIdSchema.safeParse(formData.get("eventId"));
+  const shareToken = z.string().min(1).safeParse(formData.get("shareToken"));
+
+  if (!eventId.success || !shareToken.success) {
+    return { error: "Invalid event" };
+  }
+
+  const event = await eventPath(eventId.data, shareToken.data);
+  if (!event) {
+    return { error: "Event not found" };
+  }
+
+  await createTable(event.id);
+  revalidatePath(`/events/${event.shareToken}`);
+  return null;
+}
+
+export async function deleteTableAction(
+  _prev: TableActionState,
+  formData: FormData,
+): Promise<TableActionState> {
+  await assertAuthorized();
+
+  const eventId = eventIdSchema.safeParse(formData.get("eventId"));
+  const shareToken = z.string().min(1).safeParse(formData.get("shareToken"));
+  const tableId = tableIdSchema.safeParse(formData.get("id"));
+
+  if (!eventId.success || !shareToken.success || !tableId.success) {
+    return { error: "Invalid table" };
+  }
+
+  const event = await eventPath(eventId.data, shareToken.data);
+  if (!event) {
+    return { error: "Event not found" };
+  }
+
+  // Unseat-on-delete applies when assignments exist (Phase 5+). This phase
+  // only removes the table row.
+  await deleteTableById(event.id, tableId.data);
+  revalidatePath(`/events/${event.shareToken}`);
+  return null;
+}
