@@ -22,6 +22,7 @@ import { assignSeatAction } from "@/app/actions/seating";
 import { GuestCardFace, GUEST_CARD_CLASS } from "@/app/components/guest-card";
 import { GuestSidebar } from "@/app/components/guest-list";
 import { TableBoard } from "@/app/components/table-board";
+import { toastActionResult, useToast } from "@/app/components/toast-provider";
 import {
   applySeatMove,
   guestAssignmentLabel,
@@ -136,6 +137,7 @@ export function EventSeating({
   guestError,
   tableError,
 }: Props) {
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeGuest, setActiveGuest] = useState<SeatingGuest | null>(null);
@@ -181,6 +183,7 @@ export function EventSeating({
         guestId,
         target,
       });
+      toastActionResult(result, toast);
       if (result?.error) {
         setSeatedGuests(previous);
         setError(result.error);
@@ -203,6 +206,7 @@ export function EventSeating({
         guestId,
         colour,
       });
+      toastActionResult(result, toast);
       if (result?.error) {
         setSeatedGuests(previous);
         setError(result.error);

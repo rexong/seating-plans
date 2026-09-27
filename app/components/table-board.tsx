@@ -171,7 +171,10 @@ export function TableBoard({
     return (
       <section className="flex w-full flex-col items-start gap-3">
         <h2 className="text-lg font-medium">Tables</h2>
-        <p className="text-zinc-600">No tables yet. Create the first one.</p>
+        <p className="text-sm text-zinc-700">
+          No tables yet. Add a 10-seat table, then drag guests from the sidebar
+          onto empty seats.
+        </p>
         <CreateTableButton
           eventId={eventId}
           shareToken={shareToken}

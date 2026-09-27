@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
 import { createGuestAction } from "@/app/actions/guests";
+import { useToastAction } from "@/app/components/toast-provider";
 
 type Props = {
   eventId: string;
@@ -13,7 +13,7 @@ const fieldClass =
   "min-w-0 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm";
 
 export function AddGuestForm({ eventId, shareToken, trailing }: Props) {
-  const [state, action, pending] = useActionState(createGuestAction, null);
+  const [state, action, pending] = useToastAction(createGuestAction, null);
 
   return (
     <form action={action} className="flex flex-col gap-2">

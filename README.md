@@ -40,6 +40,19 @@ Copy [`.env.example`](.env.example). Do not commit real values.
 
 On Vercel, set the same three secrets. There is no OAuth or per-user accounts.
 
+## Deploy (Vercel Hobby + Neon)
+
+Operator checklist. Do not commit secrets or the production URL.
+
+1. Create a **Neon** project (free tier). Copy the **pooled** connection string (`-pooler` in the hostname).
+2. From this repo, set `DATABASE_URL` to that production string locally (or in a one-off shell) and run `pnpm db:migrate` so production has the same schema as `main`.
+3. Create a **Vercel Hobby** project from this Git repo. Framework: Next.js. Install command can stay `pnpm install`.
+4. In Vercel → Environment Variables, set `BASIC_AUTH_USER`, `BASIC_AUTH_PASSWORD`, and `DATABASE_URL` (pooled) for Production.
+5. Deploy. Open the production host — the browser should prompt for HTTP Basic Auth.
+6. After signing in, create or open one event at `/events/[shareToken]` and confirm guests/tables persist after refresh.
+
+No `vercel.json` is required for a standard Next.js Hobby deploy. If the build fails only because of a Vercel setting, fix that in the dashboard first.
+
 ## Using the app
 
 1. Sign in with Basic Auth.
@@ -49,7 +62,9 @@ On Vercel, set the same three secrets. There is no OAuth or per-user accounts.
 5. Drag guests onto empty seats, between seats, or back to the guest list. Dropping on an occupied seat **swaps** the two guests.
 6. Guest colour stays on the person. Cards show the full name (wrapped), then designation and organisation (designation first, also wrapped), then `Table · Seat N` or `No seat`. The event header shows **total / seated / unseated** (derived from assignments, not stored).
 
-Edits persist through the existing Server Actions. There is no separate Save button.
+Edits persist through the existing Server Actions. There is no separate Save button. A brief **saved** toast confirms each write; failed writes show an **error** toast (inline form errors stay as well).
+
+An empty home list points at the create-event form. An event with no guests or no tables explains the next step and uses the existing add controls.
 
 Anyone who has **both** the Basic Auth password **and** the event URL can edit. The token stops events from being listed by guessing `/events/1`, `/events/2`, and so on. Share-without-password is not implemented.
 

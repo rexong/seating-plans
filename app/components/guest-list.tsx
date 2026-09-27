@@ -206,6 +206,12 @@ export function GuestSidebar({
     });
   }, [colourFilter, guests, query, tab]);
 
+  const trueEmpty =
+    guests.length === 0 &&
+    tab === "all" &&
+    !query.trim() &&
+    colourFilter === null;
+
   const emptyMessage = query.trim()
     ? `No guests match “${query.trim()}”.`
     : colourFilter
@@ -218,7 +224,25 @@ export function GuestSidebar({
 
   const listBody =
     visible.length === 0 ? (
-      <p className="px-1 py-3 text-sm text-zinc-600">{emptyMessage}</p>
+      trueEmpty ? (
+        <div className="flex flex-col items-start gap-3 px-1 py-3">
+          <p className="text-sm text-zinc-700">
+            No guests yet. Add a name above, or bulk-add lines as{" "}
+            <span className="font-mono text-xs">
+              name;designation;organisation
+            </span>
+            . Colour is set later from the card.
+          </p>
+          <a
+            href="#guest-name"
+            className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
+          >
+            Add the first guest
+          </a>
+        </div>
+      ) : (
+        <p className="px-1 py-3 text-sm text-zinc-600">{emptyMessage}</p>
+      )
     ) : (
       visible.map((guest) => {
         const assignment = guestAssignmentLabel(guest, tableLabels);

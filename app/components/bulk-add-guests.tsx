@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createGuestsBulkAction } from "@/app/actions/guests";
+import { useToastAction } from "@/app/components/toast-provider";
 
 type Props = {
   eventId: string;
@@ -11,7 +12,7 @@ type Props = {
 
 export function BulkAddGuests({ eventId, shareToken }: Props) {
   const [open, setOpen] = useState(false);
-  const [state, action, pending] = useActionState(createGuestsBulkAction, null);
+  const [state, action, pending] = useToastAction(createGuestsBulkAction, null);
   const lastPending = useRef(false);
 
   useEffect(() => {

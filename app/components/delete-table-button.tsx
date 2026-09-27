@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { deleteTableAction } from "@/app/actions/tables";
 import { ConfirmModal } from "@/app/components/confirm-modal";
+import { useToastAction } from "@/app/components/toast-provider";
 
 type Props = {
   eventId: string;
@@ -18,7 +19,7 @@ export function DeleteTableButton({
   tableLabel,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [state, action, pending] = useActionState(deleteTableAction, null);
+  const [state, action, pending] = useToastAction(deleteTableAction, null);
 
   return (
     <>

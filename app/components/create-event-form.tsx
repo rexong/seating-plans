@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
 import { createEventAction } from "@/app/actions/events";
+import { useToastAction } from "@/app/components/toast-provider";
 
 export function CreateEventForm() {
-  const [state, action, pending] = useActionState(createEventAction, null);
+  const [state, action, pending] = useToastAction(createEventAction, null);
 
   return (
     <form action={action} className="flex flex-col gap-2">

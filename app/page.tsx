@@ -45,7 +45,18 @@ export default async function Home() {
             Event list is unavailable until the database is reachable.
           </p>
         ) : events.length === 0 ? (
-          <p className="text-zinc-600">No events yet.</p>
+          <div className="flex flex-col items-start gap-3 rounded-md border border-dashed border-zinc-300 bg-white px-4 py-5">
+            <p className="text-sm text-zinc-700">
+              No events yet. Create one with the form above — each event gets
+              its own guest list, tables, and shareable seating URL.
+            </p>
+            <a
+              href="#event-name"
+              className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
+            >
+              Name your first event
+            </a>
+          </div>
         ) : (
           <ul className="divide-y divide-zinc-200 rounded-md border border-zinc-200 bg-white">
             {events.map((event) => (

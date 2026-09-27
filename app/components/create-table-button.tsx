@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
 import { createTableAction } from "@/app/actions/tables";
+import { useToastAction } from "@/app/components/toast-provider";
 
 type Props = {
   eventId: string;
@@ -10,7 +10,7 @@ type Props = {
 };
 
 export function CreateTableButton({ eventId, shareToken, label }: Props) {
-  const [state, action, pending] = useActionState(createTableAction, null);
+  const [state, action, pending] = useToastAction(createTableAction, null);
 
   return (
     <form action={action} className="flex flex-col items-start gap-2">
