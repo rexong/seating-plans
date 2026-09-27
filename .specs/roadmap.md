@@ -101,10 +101,18 @@ Audit/tracking needs a **good-looking snapshot of the planned seating**, not a s
 
 **Done when:** operator can print or save a PDF of the tables that matches the board after refresh and is readable for audit.
 
+## Phase 12 — Colour borders and public export
+
+- Guest colour is a **heavy left card border** (no corner dot) on the board and export/print.
+- Uncoloured guests keep a thin zinc border.
+- GET `/events/[shareToken]/export` is readable without Basic Auth.
+- **Back to seating** still challenges; Server Actions stay locked.
+
+**Done when:** colour reads as a heavy left border everywhere cards appear; the export URL is shareable without Basic Auth; Back to seating challenges; writes stay locked.
+
 ## Later (not scheduled)
 
 - Soft editor lock or overwrite warning.
-- View-only link without basic auth.
 - Guest notes / households (beyond designation and organisation).
 - Floor plan canvas.
 - Mobile layout.
@@ -124,4 +132,4 @@ Deferred from the old Phase 7 slot so guest fields, workspace layout, and the se
 
 ## Suggested build order (one line)
 
-Auth + DB → events → guests → tables → DnD seating → counts → guest org fields + cards → vertical workspace → seating snapshot → deploy.
+Auth + DB → events → guests → tables → DnD seating → counts → guest org fields + cards → vertical workspace → seating snapshot → deploy → colour borders + public export.

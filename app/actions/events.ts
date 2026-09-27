@@ -1,10 +1,9 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createEvent, deleteEventById } from "@/db/events";
-import { isBasicAuthorized } from "@/lib/basic-auth";
+import { assertOperatorAuthorized } from "@/lib/request-auth";
 
 const eventNameSchema = z
   .string()
@@ -17,10 +16,7 @@ const eventIdSchema = z.string().uuid();
 export type EventActionState = { error?: string } | null;
 
 async function assertAuthorized() {
-  const headerList = await headers();
-  if (!isBasicAuthorized(headerList.get("authorization"))) {
-    throw new Error("Unauthorized");
-  }
+  await assertOperatorAuthorized();
 }
 
 export async function createEventAction(

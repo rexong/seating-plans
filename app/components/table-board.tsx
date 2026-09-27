@@ -6,10 +6,10 @@ import { CreateTableButton } from "@/app/components/create-table-button";
 import { DeleteTableButton } from "@/app/components/delete-table-button";
 import {
   DraggableGuestCard,
-  GUEST_CARD_CLASS,
   StaticGuestCard,
 } from "@/app/components/guest-card";
 import { UnseatGuestButton } from "@/app/components/unseat-guest-button";
+import { GUEST_CARD_EMPTY_CLASS } from "@/lib/guest-card-class";
 import {
   guestAssignmentLabel,
   guestBySeat,
@@ -123,7 +123,7 @@ function SeatCell({
               {unseat}
             </div>
           ) : (
-            <div className={`${GUEST_CARD_CLASS} border-dashed bg-zinc-50`} />
+            <div className={GUEST_CARD_EMPTY_CLASS} />
           )}
         </SeatDroppable>
       ) : guest ? (
@@ -141,7 +141,7 @@ function SeatCell({
           {unseat}
         </div>
       ) : (
-        <div className={`${GUEST_CARD_CLASS} border-dashed bg-zinc-50`} />
+        <div className={GUEST_CARD_EMPTY_CLASS} />
       )}
     </div>
   );

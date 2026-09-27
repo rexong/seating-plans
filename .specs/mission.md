@@ -19,7 +19,7 @@ Assigning guests to tables is fiddly in spreadsheets. The operator needs one pla
 3. **Desktop tabular UI.** Seats are a grid/table, not a floor-plan canvas.
 4. **Auto-save.** Edits persist without an explicit Save button. Refresh and later sessions restore the last saved plan.
 5. **Cheap to run.** Stay on free-tier hosting and a free-tier database.
-6. **Simple lock on the door.** Basic authentication for the operator. Shareable event URLs are unguessable; anyone with the link can edit. Do not build invite-by-email or role systems in MVP.
+6. **Simple lock on the door.** Basic authentication for the operator. Event edit URLs are unguessable and still need the password. The print/export snapshot is readable with the token alone. Do not build invite-by-email or role systems in MVP.
 
 ## In scope (MVP)
 
@@ -41,7 +41,7 @@ Assigning guests to tables is fiddly in spreadsheets. The operator needs one pla
 - Mobile / touch-first layout.
 - Floor-plan canvas, table shapes, or room geometry.
 - Guest notes, households, dietary fields, plus-ones as first-class data (beyond designation and organisation).
-- View-only links, per-user accounts, OAuth, or email invites.
+- Per-user accounts, OAuth, or email invites. Public seating-board edit (export snapshot is the view-only link).
 - Payments, orgs, audit logs, or export/print polish beyond what a later phase adds.
 
 ## Success

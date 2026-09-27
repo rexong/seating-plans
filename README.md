@@ -58,15 +58,15 @@ No `vercel.json` is required for a standard Next.js Hobby deploy. If the build f
 1. Sign in with Basic Auth.
 2. Create an event on `/`. Each event has a share token in the path: `/events/[shareToken]`.
 3. Add guests with name plus optional designation and organisation (or bulk-add lines as `name;designation;organisation`). Click a guest card to set colour. Search matches name, designation, or organisation; filter with **All / Seated / To seat**.
-4. Add tables. Each table has **10** seats. Deleting a table unseats anyone on it. Tables stack downward in the board (another column only if there is leftover width). The guest sidebar stays put while the board scrolls; **Add table** stays top-right of the board. **Export** opens a print-friendly seating snapshot (Print → Save as PDF).
+4. Add tables. Each table has **10** seats. Deleting a table unseats anyone on it. Tables stack downward in the board (another column only if there is leftover width). The guest sidebar stays put while the board scrolls; **Add table** stays top-right of the board. **Export** opens a print-friendly seating snapshot (Print → Save as PDF). That export URL is shareable **without** Basic Auth; **Back to seating** asks for the operator password on that page (Cancel stays on export).
 5. Drag guests onto empty seats, between seats, or back to the guest list. Dropping on an occupied seat **swaps** the two guests.
-6. Guest colour stays on the person. Cards show the full name (wrapped), then designation and organisation (designation first, also wrapped), then `Table · Seat N` or `No seat`. The event header shows **total / seated / unseated** (derived from assignments, not stored).
+6. Guest colour stays on the person as a **heavy left card border** (no colour keeps a thin zinc border). Cards show the full name (wrapped), then designation and organisation (designation first, also wrapped), then `Table · Seat N` or `No seat`. The event header shows **total / seated / unseated** (derived from assignments, not stored).
 
 Edits persist through the existing Server Actions. There is no separate Save button. A brief **saved** toast confirms each write; failed writes show an **error** toast (inline form errors stay as well).
 
 An empty home list points at the create-event form. An event with no guests or no tables explains the next step and uses the existing add controls.
 
-Anyone who has **both** the Basic Auth password **and** the event URL can edit. The token stops events from being listed by guessing `/events/1`, `/events/2`, and so on. Share-without-password is not implemented.
+Anyone who has **both** the Basic Auth password **and** the event URL can edit. Anyone with `/events/[shareToken]/export` can **read** the snapshot (the token is unguessable). The token also stops events from being listed by guessing `/events/1`, `/events/2`, and so on.
 
 ## Concurrency
 
@@ -78,4 +78,4 @@ Next.js 16 (App Router, `proxy.ts` for Basic Auth), TypeScript, Tailwind, Drizzl
 
 ## Out of scope
 
-Floor-plan canvas, mobile layout, view-only links, households/notes, CSV import, and multi-editor presence.
+Floor-plan canvas, mobile layout, households/notes, CSV import, and multi-editor presence.

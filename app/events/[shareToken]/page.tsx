@@ -36,7 +36,10 @@ export default async function EventPage(
   }
 
   return (
-    <main className="flex h-dvh w-full min-w-0 flex-col overflow-hidden px-6 py-4">
+    <main
+      data-seating-editor
+      className="flex h-dvh w-full min-w-0 flex-col overflow-hidden px-6 py-4"
+    >
       <EventSeating
         eventId={event.id}
         shareToken={event.shareToken}

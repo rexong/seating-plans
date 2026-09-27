@@ -1,6 +1,10 @@
-import Link from "next/link";
-import { GuestCardFace, GUEST_CARD_CLASS } from "@/app/components/guest-card";
+import { BackToSeatingButton } from "@/app/components/back-to-seating-button";
+import { GuestCardFace } from "@/app/components/guest-card";
 import { PrintPlanButton } from "@/app/components/print-plan-button";
+import {
+  GUEST_CARD_EMPTY_CLASS,
+  guestCardShellClass,
+} from "@/lib/guest-card-class";
 import {
   guestAssignmentLabel,
   guestBySeat,
@@ -46,12 +50,7 @@ export function SeatingExport({
         </div>
         <div className="no-print flex flex-col items-end gap-2">
           <div className="flex items-center gap-3">
-            <Link
-              href={eventHref}
-              className="text-sm font-medium text-zinc-900 underline-offset-2 hover:underline"
-            >
-              Back to seating
-            </Link>
+            <BackToSeatingButton href={eventHref} />
             {tables.length > 0 && !tableError ? <PrintPlanButton /> : null}
           </div>
           <p className="text-xs text-zinc-500">
@@ -93,7 +92,7 @@ export function SeatingExport({
                         {seatIndex}
                       </span>
                       {guest ? (
-                        <div className={`${GUEST_CARD_CLASS}`}>
+                        <div className={guestCardShellClass(guest.colour)}>
                           <GuestCardFace
                             guest={guest}
                             assignment={assignment}
@@ -101,9 +100,7 @@ export function SeatingExport({
                           />
                         </div>
                       ) : (
-                        <div
-                          className={`${GUEST_CARD_CLASS} border-dashed bg-zinc-50`}
-                        />
+                        <div className={GUEST_CARD_EMPTY_CLASS} />
                       )}
                     </div>
                   );
