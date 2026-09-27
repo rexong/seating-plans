@@ -1,4 +1,6 @@
 export const BASIC_AUTH_REALM = "Seat Planning";
+export const BASIC_AUTH_DENIED_BODY = "Authentication required";
+export const SEATING_BASIC_COOKIE = "seating-basic";
 
 function timingSafeEqual(left: string, right: string) {
   const encoder = new TextEncoder();
@@ -50,4 +52,8 @@ export function isBasicAuthorized(authorizationHeader: string | null) {
   }
 
   return credentialsMatch(authorizationHeader, user, password);
+}
+
+export function isCookieAuthorized(token: string | undefined) {
+  return Boolean(token && isBasicAuthorized(`Basic ${token}`));
 }

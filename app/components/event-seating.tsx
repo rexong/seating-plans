@@ -19,7 +19,8 @@ import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import { updateGuestColourAction } from "@/app/actions/guests";
 import { assignSeatAction } from "@/app/actions/seating";
-import { GuestCardFace, GUEST_CARD_CLASS } from "@/app/components/guest-card";
+import { GuestCardFace } from "@/app/components/guest-card";
+import { guestCardShellClass } from "@/lib/guest-card-class";
 import { GuestSidebar } from "@/app/components/guest-list";
 import { TableBoard } from "@/app/components/table-board";
 import { toastActionResult, useToast } from "@/app/components/toast-provider";
@@ -340,7 +341,12 @@ export function EventSeating({
         <div className="min-h-0 w-full min-w-0 flex-1">{board}</div>
         <DragOverlay dropAnimation={null}>
           {activeGuest ? (
-            <div className={`${GUEST_CARD_CLASS} w-60 cursor-grabbing shadow-lg`}>
+            <div
+              className={guestCardShellClass(
+                activeGuest.colour,
+                "w-60 cursor-grabbing shadow-lg",
+              )}
+            >
               <GuestCardFace
                 guest={activeGuest}
                 assignment={guestAssignmentLabel(activeGuest, tableLabels)}

@@ -1,8 +1,9 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { guestCardShellClass } from "@/lib/guest-card-class";
 import {
   GUEST_COLOURS,
   guestColourDotClass,
@@ -10,9 +11,6 @@ import {
 } from "@/lib/guest-colours";
 import { guestRoleLine } from "@/lib/guest-fields";
 import type { SeatingGuest } from "@/lib/seating";
-
-export const GUEST_CARD_CLASS =
-  "flex min-h-14 w-full min-w-0 items-start gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2";
 
 type FaceProps = {
   guest: SeatingGuest;
@@ -28,32 +26,41 @@ export function GuestCardFace({
   const role = guestRoleLine(guest);
 
   return (
-    <div className="flex min-w-0 flex-1 items-start gap-2">
-      <span
-        aria-hidden
-        className={`mt-1 size-3 shrink-0 rounded-full ${guestColourDotClass(guest.colour)}`}
-      />
-      <div className="min-w-0">
-        <p className="text-sm font-medium break-words whitespace-normal text-zinc-900">
-          {guest.name}
+    <div className="min-w-0 flex-1">
+      <p className="text-sm font-medium break-words whitespace-normal text-zinc-900">
+        {guest.name}
+      </p>
+      {role ? (
+        <p className="text-xs break-words whitespace-normal text-zinc-600">
+          {role}
         </p>
-        {role ? (
-          <p className="text-xs break-words whitespace-normal text-zinc-600">
-            {role}
-          </p>
-        ) : null}
-        <p
-          className={`text-xs text-zinc-500 ${
-            wrapAssignment
-              ? "break-words whitespace-normal"
-              : "truncate"
-          }`}
-        >
-          {assignment}
-        </p>
-      </div>
+      ) : null}
+      <p
+        className={`text-xs text-zinc-500 ${
+          wrapAssignment
+            ? "break-words whitespace-normal"
+            : "truncate"
+        }`}
+      >
+        {assignment}
+      </p>
     </div>
   );
+}
+
+type Picker = { top: number; left: number };
+
+function pickerPosition(rect: DOMRect): Picker {
+  const width = 220;
+  const left = Math.min(
+    Math.max(8, rect.left),
+    window.innerWidth - width - 8,
+  );
+  const top =
+    rect.bottom + 8 + 40 > window.innerHeight
+      ? Math.max(8, rect.top - 48)
+      : rect.bottom + 4;
+  return { top, left };
 }
 
 function ColourPopover({
@@ -78,8 +85,15 @@ function ColourPopover({
       }
       onClose();
     }
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
+
+    const timer = window.setTimeout(() => {
+      document.addEventListener("pointerdown", onPointerDown);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
   }, [onClose]);
 
   return createPortal(
@@ -128,33 +142,17 @@ function ColourPopover({
   );
 }
 
-type Picker = { top: number; left: number } | null;
+function useColourPicker(enabled: boolean) {
+  const [picker, setPicker] = useState<Picker | null>(null);
 
-function useColourClick(enabled: boolean) {
-  const [picker, setPicker] = useState<Picker>(null);
-  const dragged = useRef(false);
+  function openPicker(event: React.MouseEvent<HTMLElement>) {
+    if (!enabled) {
+      return;
+    }
+    setPicker(pickerPosition(event.currentTarget.getBoundingClientRect()));
+  }
 
-  const markDrag = useCallback(() => {
-    dragged.current = true;
-  }, []);
-
-  const onClick = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
-      if (!enabled) {
-        return;
-      }
-      if (dragged.current) {
-        dragged.current = false;
-        return;
-      }
-      event.stopPropagation();
-      const rect = event.currentTarget.getBoundingClientRect();
-      setPicker({ top: rect.bottom + 4, left: rect.left });
-    },
-    [enabled],
-  );
-
-  return { picker, setPicker, markDrag, onClick };
+  return { picker, setPicker, openPicker };
 }
 
 export function StaticGuestCard({
@@ -166,13 +164,17 @@ export function StaticGuestCard({
   className?: string;
   onColourChange?: (colour: string | null) => void;
 }) {
-  const colour = useColourClick(Boolean(onColourChange));
+  const colour = useColourPicker(Boolean(onColourChange));
 
   return (
     <div className="relative min-w-0 w-full flex-1">
       <div
-        className={`${GUEST_CARD_CLASS} ${onColourChange ? "cursor-pointer" : ""} ${className}`}
-        onClick={colour.onClick}
+        className={guestCardShellClass(
+          guest.colour,
+          `${onColourChange ? "cursor-pointer" : ""} ${className}`,
+        )}
+        onClick={colour.openPicker}
+        title={onColourChange ? `Colour for ${guest.name}` : undefined}
       >
         <GuestCardFace guest={guest} assignment={assignment} />
       </div>
@@ -204,22 +206,25 @@ export function DraggableGuestCard({
     id: dragId,
     data: { guestId: guest.id },
   });
-  const colour = useColourClick(Boolean(onColourChange));
-
-  if (isDragging) {
-    colour.markDrag();
+  const colour = useColourPicker(Boolean(onColourChange));
+  if (isDragging && colour.picker) {
+    colour.setPicker(null);
   }
 
   return (
     <div className="relative min-w-0 w-full flex-1">
       <div
         ref={setNodeRef}
-        className={`${GUEST_CARD_CLASS} cursor-grab touch-none active:cursor-grabbing ${
-          isDragging ? "opacity-30" : ""
-        } ${className}`}
-        onClick={colour.onClick}
+        className={guestCardShellClass(
+          guest.colour,
+          `cursor-grab touch-none active:cursor-grabbing ${
+            isDragging ? "opacity-30" : ""
+          } ${className}`,
+        )}
         {...listeners}
         {...attributes}
+        onClick={colour.openPicker}
+        title={onColourChange ? `Colour for ${guest.name}` : undefined}
       >
         <GuestCardFace guest={guest} assignment={assignment} />
       </div>

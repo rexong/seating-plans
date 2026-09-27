@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getEventByShareToken } from "@/db/events";
@@ -10,7 +9,7 @@ import {
   deleteGuestById,
   updateGuestColour,
 } from "@/db/guests";
-import { isBasicAuthorized } from "@/lib/basic-auth";
+import { assertOperatorAuthorized } from "@/lib/request-auth";
 import { emptyToNull, parseBulkGuestLine } from "@/lib/guest-fields";
 import { GUEST_COLOURS } from "@/lib/guest-colours";
 
@@ -42,10 +41,7 @@ const guestIdSchema = z.string().uuid();
 export type GuestActionState = { error?: string } | null;
 
 async function assertAuthorized() {
-  const headerList = await headers();
-  if (!isBasicAuthorized(headerList.get("authorization"))) {
-    throw new Error("Unauthorized");
-  }
+  await assertOperatorAuthorized();
 }
 
 async function eventPath(eventId: string, shareToken: string) {

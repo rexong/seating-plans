@@ -1,11 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getEventByShareToken } from "@/db/events";
 import { createTable, deleteTableById } from "@/db/tables";
-import { isBasicAuthorized } from "@/lib/basic-auth";
+import { assertOperatorAuthorized } from "@/lib/request-auth";
 
 const eventIdSchema = z.string().uuid();
 const tableIdSchema = z.string().uuid();
@@ -13,10 +12,7 @@ const tableIdSchema = z.string().uuid();
 export type TableActionState = { error?: string } | null;
 
 async function assertAuthorized() {
-  const headerList = await headers();
-  if (!isBasicAuthorized(headerList.get("authorization"))) {
-    throw new Error("Unauthorized");
-  }
+  await assertOperatorAuthorized();
 }
 
 async function eventPath(eventId: string, shareToken: string) {

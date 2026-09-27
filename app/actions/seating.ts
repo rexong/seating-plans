@@ -1,10 +1,9 @@
 "use server";
 
-import { headers } from "next/headers";
 import { z } from "zod";
 import { applySeatAssignment } from "@/db/seating";
 import { getEventByShareToken } from "@/db/events";
-import { isBasicAuthorized } from "@/lib/basic-auth";
+import { assertOperatorAuthorized } from "@/lib/request-auth";
 import type { SeatTarget } from "@/lib/seating";
 
 const eventIdSchema = z.string().uuid();
@@ -21,10 +20,7 @@ const targetSchema = z.discriminatedUnion("type", [
 export type AssignSeatResult = { error?: string } | null;
 
 async function assertAuthorized() {
-  const headerList = await headers();
-  if (!isBasicAuthorized(headerList.get("authorization"))) {
-    throw new Error("Unauthorized");
-  }
+  await assertOperatorAuthorized();
 }
 
 export async function assignSeatAction(input: {

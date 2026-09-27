@@ -33,11 +33,11 @@ Keep assignments consistent: a guest has at most one seat; a seat has at most on
 | Concern | Choice |
 | --- | --- |
 | Operator login | **HTTP Basic Auth** (username + password from environment variables). This app has **one user**. |
-| App access | All mutating UI and APIs sit behind basic auth **except** if we later decide share links bypass login. **MVP default:** share URL still requires the same basic auth (one operator). The “secret link” is the **unguessable event token in the path** so events are not enumerable (`/events/[shareToken]`). |
-| Sharing | Anyone who has the operator password **and** the event URL can edit. No per-guest accounts. |
+| App access | Mutating UI and APIs stay behind operator credentials (HTTP Basic header or the same credentials stored in an httpOnly cookie after export sign-in). **GET** `/events/[shareToken]/export` is public (unguessable token). Home and `/events/[shareToken]` still require those credentials. `POST /api/session` is public so export can sign in without a browser 401 page. |
+| Sharing | Anyone who has the operator password **and** the event URL can edit. The export snapshot is readable with the token alone. No per-guest accounts. |
 | Concurrency | **Not implemented.** Last write wins. Document this in the UI or README. |
 
-If share-without-password is needed later, add a separate token-gated route. Do not build that until asked.
+Public read is the existing export path only. Do not open the seating board or Server Actions without operator credentials.
 
 ## Hosting (free tier)
 
