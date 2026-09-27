@@ -97,18 +97,18 @@ export function toastActionResult(
   toast.showSaved();
 }
 
-export function useToastAction<S extends ActionState>(
-  action: (prev: S, formData: FormData) => Promise<S>,
-  initial: S,
+export function useToastAction(
+  action: (prev: ActionState, formData: FormData) => Promise<ActionState>,
+  initial: ActionState,
 ) {
   const toast = useToast();
   const bound = useCallback(
-    async (prev: S, formData: FormData) => {
+    async (prev: ActionState, formData: FormData) => {
       const result = await action(prev, formData);
       toastActionResult(result, toast);
       return result;
     },
     [action, toast],
   );
-  return useActionState(bound, initial);
+  return useActionState<ActionState, FormData>(bound, initial);
 }
